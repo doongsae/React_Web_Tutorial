@@ -1,12 +1,10 @@
 import { React, Component } from 'react';
 import Customer from './components/customer';
 import './App.css';
-import { Table, TableHead, TableBody, TableRow, TableCell, Paper, createTheme } from '@material-ui/core';
-import { withStyles } from '@material-ui/styles';
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 
-const theme = createTheme();
-
-const styles = {
+const styles = theme => ({
   root: {
     width: '100%',
     marginTop: theme.spacing.unit * 3,
@@ -15,7 +13,7 @@ const styles = {
   table: {
     minWidth: 1080
   }
-};
+})
 
 class App extends Component {
   state = {
@@ -30,7 +28,7 @@ class App extends Component {
 
   callApi = async() => {
     const response = await fetch('/api/customers');
-    const body = await response.json;
+    const body = await response.json();
 
     return body;
   }
