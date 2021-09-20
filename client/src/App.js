@@ -1,26 +1,31 @@
 import { React, Component } from 'react';
 import Customer from './components/customer';
 import './App.css';
-import { Table, TableHead, TableBody, TableRow, TableCell, Paper } from '@material-ui/core';
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper, CircularProgress } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing.unit * 3,
+    marginTop: theme.spacing(3),
     overflowX: "auto"
   },
   table: {
     minWidth: 1080
+  },
+  progress:  {
+    marginTop: theme.spacing(2)
   }
 })
 
 class App extends Component {
   state = {
-    customers: ""
+    customers: "",
+    completed: 0
   }
 
   componentDidMount() {
+    this.timer = setInterval(this.progress, 20);
     this.callApi()
       .then(res => this.setState({customers: res}))
       .catch(err => console.log(err));
@@ -31,6 +36,11 @@ class App extends Component {
     const body = await response.json();
 
     return body;
+  }
+
+  progress = () => {
+    const { completed } = this.state;
+    this.setState({ completed: completed >= 100 ? 0 : completed + 1 });
   }
 
   render() {
@@ -51,8 +61,12 @@ class App extends Component {
           <TableBody>
             {this.state.customers ? this.state.customers.map(cs => {
                                     return ( <Customer key={cs.id} id={cs.id} image={cs.image} name={cs.name}
-                                                        birthday={cs.birthday} gender={cs.gender} job={cs.job}/> ); })
-                                    : ""}
+                                                        birthday={cs.birthday} gender={cs.gender} job={cs.job}/> ); }) :
+            <TableRow>
+              <TableCell colSpan="6" align="center">
+              <CircularProgress className={classes.progress} variant="determinate" value={this.state.completed} />
+              </TableCell>
+            </TableRow>}
           </TableBody>
         </Table>
       </Paper>
