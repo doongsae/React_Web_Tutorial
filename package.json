@@ -1,6 +1,7 @@
 {
     "name": "management",
     "version": "1.0.0",
+    
     "scripts": {
         "client": "cd client && yarn start",
         "server": "nodemon server.js",
@@ -9,6 +10,7 @@
     "dependencies": {
         "body-parser": "^1.18.3",
         "express": "^4.16.4",
+        "firebase": "^9.0.2",
         "http-proxy-middleware": "^2.0.1"
     },
     "devDependencies": {
