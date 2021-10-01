@@ -1,7 +1,4 @@
-const { initializeApp } = require('@firebase/app');
-const { getDatabase, ref, onValue } = require('@firebase/database');
 const fs = require('fs');
-
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -9,24 +6,50 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 const data = fs.readFileSync('./database.json');
 const conf = JSON.parse(data);
-var firebaseConfig = {
-  apiKey: conf.apiKey,
-  authDomain: conf.authDomain,
-  databaseURL: conf.databaseURL,
-  storageBucket: conf.storageBucket
-};
+const mysql = require('mysql');
 
-const fbApp = initializeApp(firebaseConfig);
-var fb_database = getDatabase();
+const connection = mysql.createConnection({
+  host: conf.host,
+  user: conf.user,
+  password: conf.password,
+  port: conf.port,
+  database: conf.database
+})
+connection.connect();
 
 app.get('/api/customers', (req, res) => {
-  const personRef = ref(fb_database, '/people');
-  onValue(personRef, (snapshot) => {
-    const resV = snapshot.val();
-    res.send(resV);
-  })
+  connection.query(
+    "SELECT * FROM CUSTOMER",
+    (err, rows, fields) => {
+      res.send(rows);
+    }
+  );
 });
+
+
+const multer = require('multer');
+const upload = multer({ dest: './upload' });
+
+app.use('/image', express.static('./upload'));
+
+app.post('/api/customers', upload.single('image'), (req, res) => {
+  let sql = 'INSERT INTO CUSTOMER VALUES (null, ?, ?, ?, ?, ?)';
+  let image = 'http://localhost:5000/image/' + req.file.filename;
+  let name = req.body.name;
+  let birthday = req.body.birthday;
+  let gender = req.body.gender;
+  let job = req.body.job;
+  
+  let params = [image, name, birthday, gender, job];
+  connection.query(sql, params,
+    (err, rows, fields) => {
+      res.send(rows);
+    }
+  );
+})
+
 
 app.listen(port, () => console.log(`Listening on Port ${port}`));
